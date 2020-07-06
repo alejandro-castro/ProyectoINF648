@@ -7,3 +7,6 @@ seaborn
 jupyter
 nbdime
 xlrd
+altair
+lightgbm
+cmake
