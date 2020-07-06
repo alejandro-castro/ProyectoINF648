@@ -5,6 +5,7 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import time
+import pandas as pd
 
 from sklearn.model_selection import StratifiedKFold
 from sklearn.impute import SimpleImputer
@@ -108,8 +109,10 @@ class FeedForwardNeuralNetwork():
             numberOfUnits = self.architecture.getNumberOfUnits(layer)
             activation = self.architecture.getActivationFunction(layer)
             model.add(tf.keras.layers.Dense(numberOfUnits, activation=activation, use_bias=True,
-                                            kernel_initializer=tf.keras.initializers.GlorotUniform,
+                                            kernel_initializer=tf.keras.initializers.GlorotUniform, 
                                             bias_initializer=tf.zeros_initializer))
+            #, kernel_regularizer=tf.keras.regularizers.l2(l=0.005)
+                                            
     
         return model
  
@@ -147,6 +150,8 @@ class FeedForwardNeuralNetwork():
         
         assert (cv is None) or(cv >= 2)
         
+        numberOfFeatures = X_train.shape[1]
+
         #Fijamos la semilla aleatoria de Tensorflow para volver reproducible el código
         tf.random.set_seed(randomState) 
 
@@ -154,7 +159,7 @@ class FeedForwardNeuralNetwork():
         optimizer = tf.keras.optimizers.Adam(learning_rate=learningRate)
         
         #Definición de la función de pérdida o costo
-        loss = tf.keras.losses.SparseCategoricalCrossentropy()
+        loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
         
         shouldValidate = cv is not None 
         #Entrenamiento de varios modelos con misma arquitectura pero con diferente inicialización aleatoria
@@ -171,7 +176,6 @@ class FeedForwardNeuralNetwork():
             modelsAndMetrics = [] #Lista para almacenar los distintos modelos entrenados así como sus métricas
 
             for i in range(numberOfInitializations):
-                numberOfFeatures = X_train.shape[1]
                 #Creación del modelo
                 model = self._createModel(numberOfFeatures)
 
@@ -215,7 +219,9 @@ class FeedForwardNeuralNetwork():
             #si no hay mejoras significativas
             callback = tf.keras.callbacks.EarlyStopping(monitor='loss', min_delta=10**-3, patience=5, verbose=0, mode='min')
             
-            #Compilando el modelo guardado
+            #Compilando el modelo guardado, si no se crea
+            if self.model is None:
+                self.model = self._createModel(numberOfFeatures)
             self.model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
             
             #Imputacion
