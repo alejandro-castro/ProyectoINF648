@@ -111,7 +111,7 @@ class FeedForwardNeuralNetwork():
             model.add(tf.keras.layers.Dense(numberOfUnits, activation=activation, use_bias=True,
                                             kernel_initializer=tf.keras.initializers.GlorotUniform, 
                                             bias_initializer=tf.zeros_initializer))
-            #, kernel_regularizer=tf.keras.regularizers.l2(l=0.005)
+            # Agregar si se desea agregar regularización por capa, kernel_regularizer=tf.keras.regularizers.l2(l=0.005)
                                             
     
         return model
