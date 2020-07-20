@@ -314,7 +314,7 @@ class FeedForwardNeuralNetwork():
 
     def score(self, x, y):
         """
-        Método que devuelve la precisión del modelo para el correspondiente par de datos x,y
+        Método que devuelve la exactitud del modelo para el correspondiente par de datos x,y
         Parámetros:
         x,y : Conjunto de características y etiquetas respectivamente, pueden ser Dataframes, Series de Pandas respectivamente o
         arreglos de Numpy, lo único necesario es que x tenga la forma (número de muestras, número de características)
@@ -352,3 +352,17 @@ class FeedForwardNeuralNetwork():
             index += 1
 
         return modelsAndMetrics[indexOfHighestMetric]["model"], modelsAndMetrics[indexOfHighestMetric][metric]
+
+    def predict(self, x):
+        """
+        Método que devuelve la predicción del modelo para el correspondiente x
+        Parámetros:
+        x: Conjunto de características puede ser Dataframes, Series de Pandas respectivamente o arreglos de Numpy, lo único
+        necesario es que x tenga la forma (número de muestras, número de características)
+        """
+        x_imputed = self.imputer.transform(x)
+        x_scaled = self.scaler.transform(x_imputed)
+        activations = tf.nn.softmax(self.model(x_scaled, training=False))
+        return tf.math.argmax(activations, axis=1)
+
+
